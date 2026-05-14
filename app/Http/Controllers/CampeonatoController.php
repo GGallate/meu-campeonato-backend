@@ -19,10 +19,17 @@ class CampeonatoController extends Controller
 
         $timesArray = $times->toArray();
 
+        
+        $pontuacoes = [];
+        foreach ($timesArray as $time) {
+            $pontuacoes[$time['id']] = 0;
+        }
+
         $quartas = [];
         $semifinalistas = [];
         for ($i = 0; $i < 8; $i += 2) {
-            $partida = $this->jogarPartida($timesArray[$i], $timesArray[$i + 1]);
+            
+            $partida = $this->jogarPartida($timesArray[$i], $timesArray[$i + 1], $pontuacoes);
             $quartas[] = $partida;
             $semifinalistas[] = $partida['vencedor'];
         }
@@ -31,14 +38,14 @@ class CampeonatoController extends Controller
         $finalistas = [];
         $disputaTerceiro = [];
         for ($i = 0; $i < 4; $i += 2) {
-            $partida = $this->jogarPartida($semifinalistas[$i], $semifinalistas[$i + 1]);
+            $partida = $this->jogarPartida($semifinalistas[$i], $semifinalistas[$i + 1], $pontuacoes);
             $semis[] = $partida;
             $finalistas[] = $partida['vencedor'];
             $disputaTerceiro[] = $partida['perdedor'];
         }
 
-        $terceiroLugarPartida = $this->jogarPartida($disputaTerceiro[0], $disputaTerceiro[1]);
-        $final = $this->jogarPartida($finalistas[0], $finalistas[1]);
+        $terceiroLugarPartida = $this->jogarPartida($disputaTerceiro[0], $disputaTerceiro[1], $pontuacoes);
+        $final = $this->jogarPartida($finalistas[0], $finalistas[1], $pontuacoes);
 
         $campeonatoSalvo = Campeonato::create([
             'campeao' => $final['vencedor']['nome'],
@@ -48,7 +55,8 @@ class CampeonatoController extends Controller
                 'quartas' => $quartas,
                 'semifinais' => $semis,
                 'terceiro_lugar' => $terceiroLugarPartida,
-                'final' => $final
+                'final' => $final,
+                'pontuacao_final_times' => $pontuacoes
             ]
         ]);
 
@@ -58,7 +66,7 @@ class CampeonatoController extends Controller
         ], 201);
     }
 
-    private function jogarPartida($timeA, $timeB)
+    private function jogarPartida($timeA, $timeB, &$pontuacoes)
     {
         $caminhoScript = base_path('teste.py');
         
@@ -68,16 +76,35 @@ class CampeonatoController extends Controller
         $golsA = isset($gols[0]) ? (int)$gols[0] : 0;
         $golsB = isset($gols[1]) ? (int)$gols[1] : 0;
 
-        if ($golsA === $golsB) {
-            if ($timeA['id'] < $timeB['id']) {
-                $golsA++;
+        $pontuacoes[$timeA['id']] += ($golsA - $golsB);
+        $pontuacoes[$timeB['id']] += ($golsB - $golsA);
+
+        $vencedor = null;
+        $perdedor = null;
+
+        if ($golsA > $golsB) {
+            $vencedor = $timeA;
+            $perdedor = $timeB;
+        } elseif ($golsB > $golsA) {
+            $vencedor = $timeB;
+            $perdedor = $timeA;
+        } else {
+            if ($pontuacoes[$timeA['id']] > $pontuacoes[$timeB['id']]) {
+                $vencedor = $timeA;
+                $perdedor = $timeB;
+            } elseif ($pontuacoes[$timeB['id']] > $pontuacoes[$timeA['id']]) {
+                $vencedor = $timeB;
+                $perdedor = $timeA;
             } else {
-                $golsB++;
+                if ($timeA['id'] < $timeB['id']) {
+                    $vencedor = $timeA;
+                    $perdedor = $timeB;
+                } else {
+                    $vencedor = $timeB;
+                    $perdedor = $timeA;
+                }
             }
         }
-
-        $vencedor = $golsA > $golsB ? $timeA : $timeB;
-        $perdedor = $golsA > $golsB ? $timeB : $timeA;
 
         return [
             'time_a' => $timeA['nome'],
