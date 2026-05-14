@@ -6,3 +6,5 @@ use App\Http\Controllers\TimeController;
 
 Route::post('/times', [TimeController::class, 'cadastrar']);
 Route::get('/times', [TimeController::class, 'listar']);
+
+Route::post('/campeonato/simular', [App\Http\Controllers\CampeonatoController::class, 'simular']);
