@@ -1,59 +1,142 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Meu Campeonato BackEnd
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+O Meu Campeonato é uma API RESTful desenvolvida em Laravel 11 para gerenciar e simular campeonatos de futebol no formato mata-mata (eliminatório). 
 
-## About Laravel
+O sistema recebe 8 times, gera o chaveamento automaticamente (Quartas de Final, Semifinais, Disputa de 3º Lugar e Final) e utiliza um script nativo em Python para gerar os placares das partidas de forma randômica, simulando um serviço externo de inteligência artificial.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## O que o sistema faz (Features)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Cadastro de Times:** Permite o registro dos 8 times participantes do torneio.
+- **Validação de Regras:** Impede a simulação do campeonato caso o número de times seja diferente de 8.
+- **Integração PHP + Python:** Executa o script `teste.py` diretamente pelo backend para gerar os placares.
+- **Sistema de Desempate:**
+  1. Maior pontuação acumulada (saldo de gols do campeonato).
+  2. Ordem de inscrição (time cadastrado primeiro vence).
+- **Histórico de Campeonatos:** Salva o resultado final (Campeão, Vice, Terceiro Lugar e todo o chaveamento) no banco de dados para consultas futuras.
+- **Testes Automatizados:** Cobertura de testes de integração (Feature Tests) para garantir a estabilidade das rotas e regras de negócio.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Tecnologias Utilizadas
+- **PHP 8+** (Laravel 11)
+- **Python 3** (Script de simulação)
+- **MySQL** (Banco de dados relacional)
+- **Docker & Laravel Sail** (Containerização)
+- **PHPUnit** (Testes automatizados)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Como executar o projeto
 
-## Laravel Sponsors
+Você pode rodar este projeto de duas maneiras: 
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Utilizando Docker (Recomendado, pois o ambiente já contém o Python configurado) ou diretamente via PHP local.
 
-### Premium Partners
+### Opção 1: Executando via Docker **(Recomendado)**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+**Pré-requisitos:** Ter o [Docker](https://www.docker.com/) e o [Composer](https://getcomposer.org/) instalados na sua máquina.
 
-## Contributing
+**1.** Clone o repositório:
+```bash
+git clone https://github.com/GGallate/meu-campeonato-backend.git
+cd meu-campeonato-backend
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**2.** Instale as dependências do PHP:
+```bash
+composer install
+```
 
-## Code of Conduct
+**3.** Configure o ambiente::
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Copie o arquivo de configuração de exemplo e gere a chave da aplicação.
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Security Vulnerabilities
+Atenção: Certifique-se de que no arquivo .env, as credenciais do banco estejam apontando para o Docker:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+`DB_CONNECTION=mysql`
 
-## License
+`DB_HOST=mysql`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+`DB_PORT=3306`
+
+**4.** Suba os containers (O Docker irá baixar o Linux, PHP, MySQL e Python automaticamente):
+```bash
+./vendor/bin/sail up -d --build
+```
+
+**5.** Crie as tabelas no banco de dados::
+```bash
+./vendor/bin/sail artisan migrate
+```
+
+O servidor estará rodando em `http://127.0.0.1`.
+
+### Opção 2: Executando Localmente (Sem Docker)
+
+**Pré-requisitos**: Ter o PHP 8.2+, Composer, MySQL e Python 3 instalados diretamente no seu sistema operacional.
+
+**1.** Clone o repositório e acesse a pasta:
+```bash
+git clone https://github.com/GGallate/meu-campeonato-backend.git
+cd meu-campeonato-backend
+```
+
+**2.** Instale as dependências:
+```bash
+composer install
+```
+
+**3.** Configure o ambiente e o banco de dados:
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Crie um banco de dados no seu MySQL local (ex: `campeonato_api`). Em seguida, edite o arquivo .env com as suas credenciais:
+
+`DB_HOST=127.0.0.1`
+
+`DB_DATABASE=campeonato_api`
+
+`DB_USERNAME=seu_usuario`
+
+`DB_PASSWORD=sua_senha`
+
+
+**4.** Rode as migrations:
+```bash
+php artisan migrate
+```
+
+**5.** Instale as dependências do PHP:
+```bash
+php artisan serve
+```
+
+O servidor estará rodando em `http://127.0.0.1:8000`.
+
+## Endpoints da API (Rotas)
+Uma collection completa com exemplos de requisições está disponível na raiz do projeto no arquivo ``postman_collection.json`` (Pode ser importada no Postman, Insomnia ou Thunder Client).
+
+- `POST /api/times` - Cadastra um novo time. (Body: {"nome": "Nome do Time"})
+- `GET /api/times` - Lista todos os times cadastrados.
+- `POST /api/campeonatos/simular` - Executa o script Python, simula os jogos, salva no banco e retorna o resultado final.
+- `GET /api/campeonatos` - Retorna o histórico de todos os campeonatos simulados anteriormente.
+
+## Como rodar os Testes Automatizados
+
+O projeto conta com testes de integração para garantir o funcionamento do fluxo de simulação e das validações de negócio.
+
+**Se estiver usando Docker (Sail):**
+```bash
+./vendor/bin/sail artisan test
+```
+
+**Se estiver usando o ambiente local:**
+```bash
+php artisan test
+```

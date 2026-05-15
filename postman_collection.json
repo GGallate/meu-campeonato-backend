@@ -1,0 +1,74 @@
+{
+  "info": {
+    "name": "Meu Campeonato Backend",
+    "description": "Collection completa para testar as rotas do projeto Meu Campeonato.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Cadastrar Time",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Irroba Futebol Clube\"\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1/api/times",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "path": ["api", "times"]
+        }
+      }
+    },
+    {
+      "name": "2. Listar Times",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1/api/times",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "path": ["api", "times"]
+        }
+      }
+    },
+    {
+      "name": "3. Simular Campeonato",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1/api/campeonatos/simular",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "path": ["api", "campeonatos", "simular"]
+        }
+      }
+    },
+    {
+      "name": "4. Histórico de Campeonatos",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1/api/campeonatos",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "path": ["api", "campeonatos"]
+        }
+      }
+    }
+  ]
+}
